@@ -40,10 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-<<<<<<< HEAD
     'usuarios',
-=======
->>>>>>> 61860964927b524d9aed684d89df6daf8ba10711
 ]
 
 MIDDLEWARE = [
