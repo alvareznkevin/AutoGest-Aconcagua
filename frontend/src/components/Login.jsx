@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { UserRound, LockKeyhole, Eye, EyeOff, CarFront, ArrowRight, CircleAlert } from 'lucide-react';
+import VehicleIllustration from './VehicleIllustration';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,6 +24,7 @@ export default function Login() {
     <section className="login-editorial">
       <div className="brand brand-light"><span className="brand-symbol"><CarFront size={26} strokeWidth={1.5}/></span><span>AutoGest<small>ACONCAGUA</small></span></div>
       <div className="editorial-body"><span className="section-kicker">GESTIÓN AUTOMOTRIZ</span><h1>Tu automotora, conectada.</h1><p>Organiza tu gestión y dedica más tiempo a tus clientes.</p><div className="editorial-rule"/><span className="editorial-caption">Vehículos · Clientes · Oportunidades</span></div>
+      <VehicleIllustration />
       <div className="editorial-footer"><span>AutoGest Aconcagua</span><span>Sistema de gestión comercial</span></div>
     </section>
     <section className="login-form-panel" aria-labelledby="login-title">
