@@ -14,3 +14,11 @@ frontend/.env.local
 # Entornos y sistema
 .vscode/
 .DS_Store
+# Deployment secrets and generated assets
+**/__pycache__/
+backend/staticfiles/
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example

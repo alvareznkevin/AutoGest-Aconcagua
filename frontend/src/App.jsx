@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import RegistroCliente from './components/RegistroCliente';
+import ListaClientes from './components/ListaClientes';
 import './App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -15,6 +17,8 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/clientes" element={<ProtectedRoute><ListaClientes /></ProtectedRoute>} />
+          <Route path="/clientes/registrar" element={<ProtectedRoute><RegistroCliente /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
