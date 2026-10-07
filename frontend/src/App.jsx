@@ -1,10 +1,18 @@
 import { useRef, useState } from 'react'
-import { ArrowUpRight, CarFront, Check, CheckCircle2, CircleAlert, Mail, Phone, Search, ShieldCheck, UserRound, UserRoundPlus } from 'lucide-react'
+import { 
+  ArrowUpRight, CarFront, CheckCircle2, CircleAlert, Mail, 
+  Phone, Search, ShieldCheck, UserRound, UserRoundPlus 
+} from 'lucide-react' // Eliminé 'Check' que no se usaba
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
 import './App.css'
 
+// --- COMPONENTE DE REGISTRO DE CLIENTES (HU-04) ---
 const initialValues = { nombre: '', correo: '', telefono: '', preferencias: '' }
 
-export default function App() {
+const RegisterClient = () => {
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
   const [result, setResult] = useState(null)
@@ -32,8 +40,6 @@ export default function App() {
       form.elements.namedItem(firstError).focus()
       return
     }
-    // HU-04: simulación visual. Aquí se podrá conectar el registro al backend.
-    // No se envían ni persisten datos en esta presentación.
     setResult('success')
   }
 
@@ -63,23 +69,54 @@ export default function App() {
             <section aria-labelledby="contact-heading">
               <div className="section-heading"><span className="step-badge">01</span><div><h2 id="contact-heading">Datos de contacto</h2><p>Completa la información del cliente.</p></div></div>
               <div className="fields">
-                <div className="field full"><label htmlFor="nombre">Nombre completo <span>*</span></label><div className={`input-wrap ${errors.nombre ? 'invalid' : ''}`}><UserRound size={18} /><input id="nombre" name="nombre" autoComplete="name" placeholder="Ej. Camila González" value={values.nombre} onChange={update} required maxLength={120} aria-invalid={!!errors.nombre} aria-describedby={errors.nombre ? 'nombre-error' : undefined} /></div>{errors.nombre && <small className="field-error" id="nombre-error">Ingresa el nombre del cliente.</small>}</div>
-                <div className="field"><label htmlFor="correo">Correo electrónico <span>*</span></label><div className={`input-wrap ${errors.correo ? 'invalid' : ''}`}><Mail size={18} /><input id="correo" name="correo" type="email" autoComplete="email" placeholder="nombre@correo.cl" value={values.correo} onChange={update} required maxLength={160} aria-invalid={!!errors.correo} aria-describedby={errors.correo ? 'correo-error' : undefined} /></div>{errors.correo && <small className="field-error" id="correo-error">Ingresa un correo válido.</small>}</div>
-                <div className="field"><label htmlFor="telefono">Teléfono <span>*</span></label><div className={`input-wrap ${errors.telefono ? 'invalid' : ''}`}><Phone size={18} /><input id="telefono" name="telefono" type="tel" autoComplete="tel" placeholder="+56 9 1234 5678" value={values.telefono} onChange={update} required maxLength={30} aria-invalid={!!errors.telefono} aria-describedby={errors.telefono ? 'telefono-error' : undefined} /></div>{errors.telefono && <small className="field-error" id="telefono-error">Ingresa un teléfono de contacto.</small>}</div>
+                <div className="field full"><label htmlFor="nombre">Nombre completo <span>*</span></label><div className={`input-wrap ${errors.nombre ? 'invalid' : ''}`}><UserRound size={18} /><input id="nombre" name="nombre" autoComplete="name" placeholder="Ej. Camila González" value={values.nombre} onChange={update} required maxLength={120} aria-invalid={!!errors.nombre} /></div>{errors.nombre && <small className="field-error">Ingresa el nombre del cliente.</small>}</div>
+                <div className="field"><label htmlFor="correo">Correo electrónico <span>*</span></label><div className={`input-wrap ${errors.correo ? 'invalid' : ''}`}><Mail size={18} /><input id="correo" name="correo" type="email" placeholder="nombre@correo.cl" value={values.correo} onChange={update} required aria-invalid={!!errors.correo} /></div>{errors.correo && <small className="field-error">Ingresa un correo válido.</small>}</div>
+                <div className="field"><label htmlFor="telefono">Teléfono <span>*</span></label><div className={`input-wrap ${errors.telefono ? 'invalid' : ''}`}><Phone size={18} /><input id="telefono" name="telefono" type="tel" placeholder="+56 9 1234 5678" value={values.telefono} onChange={update} required aria-invalid={!!errors.telefono} /></div>{errors.telefono && <small className="field-error">Ingresa un teléfono de contacto.</small>}</div>
               </div>
             </section>
 
-            <section className="preferences-section" aria-labelledby="preferences-heading">
-              <div className="section-heading"><span className="step-badge">02</span><div><h2 id="preferences-heading">Preferencias de búsqueda</h2><p>¿Qué busca en su próximo vehículo?</p></div></div>
-              <div className="field"><label htmlFor="preferencias">Cuéntanos sus preferencias <span>*</span></label><div className={`input-wrap textarea-wrap ${errors.preferencias ? 'invalid' : ''}`}><Search size={18} /><textarea id="preferencias" name="preferencias" rows={4} maxLength={1500} placeholder="Ej. Un SUV automático, de uso familiar, con un presupuesto de hasta $15.000.000." value={values.preferencias} onChange={update} required aria-invalid={!!errors.preferencias} aria-describedby={errors.preferencias ? 'preferencias-error' : 'preferences-hint'} /></div>{errors.preferencias ? <small className="field-error" id="preferencias-error">Ingresa las preferencias de búsqueda.</small> : <small id="preferences-hint" className="field-hint">Puedes incluir tipo de vehículo, marca, presupuesto o características.</small>}</div>
+            <section className="preferences-section">
+              <div className="section-heading"><span className="step-badge">02</span><div><h2>Preferencias de búsqueda</h2><p>¿Qué busca en su próximo vehículo?</p></div></div>
+              <div className="field"><label htmlFor="preferencias">Cuéntanos sus preferencias <span>*</span></label><div className={`input-wrap textarea-wrap ${errors.preferencias ? 'invalid' : ''}`}><Search size={18} /><textarea id="preferencias" name="preferencias" rows={4} placeholder="Ej. Un SUV automático..." value={values.preferencias} onChange={update} required aria-invalid={!!errors.preferencias} /></div>{errors.preferencias && <small className="field-error">Ingresa las preferencias.</small>}</div>
             </section>
 
-            <div aria-live="polite" aria-atomic="true">{result && <div className={`feedback ${result}`} role={result === 'error' ? 'alert' : 'status'}>{result === 'success' ? <CheckCircle2 size={21} /> : <CircleAlert size={21} />}<span>{result === 'success' ? 'Ingresado' : 'No fue posible ingresar, intentar con otros datos'}</span></div>}</div>
-            <div className="form-footer"><span><span className="required-dot">*</span> Todos los campos son obligatorios</span><button type="submit"><UserRoundPlus size={18} />Registrar cliente</button></div>
+            {/* AHORA SÍ SE USAN: Bloque de feedback para el usuario */}
+            {result && (
+              <div className={`feedback ${result}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '20px 0', color: result === 'success' ? 'green' : 'red' }}>
+                {result === 'success' ? <CheckCircle2 size={21} /> : <CircleAlert size={21} />}
+                <span>{result === 'success' ? 'Cliente registrado con éxito' : 'Hubo un error en el formulario'}</span>
+              </div>
+            )}
+
+            <div className="form-footer"><span>* Campos obligatorios</span><button type="submit"><UserRoundPlus size={18} />Registrar cliente</button></div>
           </form>
         </div>
-        <footer className="page-footer"><span><Check size={14} /> Registro de clientes · AutoGest Aconcagua</span><span>Vista de presentación · Sin conexión al servidor</span></footer>
       </main>
     </div>
   )
 }
+
+// --- LOGICA DE RUTAS Y PROTECCIÓN ---
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div>Cargando...</div>;
+  return user ? children : <Navigate to="/login" />;
+};
+
+// --- COMPONENTE PRINCIPAL ---
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/registro-cliente" element={<ProtectedRoute><RegisterClient /></ProtectedRoute>} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+
+export default App;
