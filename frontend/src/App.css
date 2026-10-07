@@ -1,0 +1,183 @@
+:root {
+  --primary: #0088ea;
+  --dark: #0c2338;
+  --light: #f8fafc;
+  --text: #1e293b;
+}
+
+/* 1. RESET CRÍTICO */
+* {
+  box-sizing: border-box; /* Fundamental para que el padding no sume ancho */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: var(--light);
+  color: var(--text);
+  overflow-x: hidden; /* Seguridad extra contra scroll horizontal */
+  width: 100%;
+}
+
+/* 2. LAYOUT LOGIN RESPONSIVE */
+.login-screen {
+  display: flex;
+  flex-direction: column; /* Móvil primero: uno arriba de otro */
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Cuando la pantalla es grande, se ponen de lado */
+@media (min-width: 1024px) {
+  .login-screen {
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+.panel-info {
+  flex: 1;
+  background: var(--dark);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 20px; /* Padding reducido para móviles */
+}
+
+@media (min-width: 1024px) {
+  .panel-info {
+    padding: 0px; /* Padding original para escritorio */
+  }
+}
+
+.panel-info h1 {
+  font-size: clamp(1.8rem, 5vw, 2.8rem); /* Tamaño de fuente fluido */
+  margin-bottom: 1rem;
+  color: var(--primary);
+
+    /* --- LOS CAMBIOS ESTÁN AQUÍ --- */
+  line-height: 1;       /* Separa "AutoGest" de "Aconcagua" si están en dos renglones */
+
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.icon-box {
+  background: rgba(255,255,255,0.1);
+  padding: 12px;
+  border-radius: 50%;
+  display: flex;
+  flex-shrink: 0; /* Evita que el icono se aplaste */
+}
+
+/* 3. PANEL DEL FORMULARIO */
+.panel-form {
+  flex: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+@media (min-width: 768px) {
+  .login-card {
+    padding: 40px;
+  }
+}
+
+/* 4. INPUTS Y BOTONES */
+.input-container {
+  position: relative;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-container label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.input-container input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  display: block;
+}
+
+.icon-input { position: absolute; left: 15px; top: 40px; color: #94a3b8; }
+.btn-eye { position: absolute; right: 15px; top: 40px; cursor: pointer; color: #94a3b8; border:none; background:none; }
+
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.btn-login:hover {
+  background: #0077cc;
+}
+
+/* 5. DASHBOARD RESPONSIVE */
+.nav {
+  background: white;
+  padding: 15px 5%;
+  display: flex;
+  flex-wrap: wrap; /* Para que si no caben, bajen */
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 30px 5%; /* Padding más amigable para móviles */
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    padding: 50px 8%;
+  }
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: 0.3s;
+}
+
