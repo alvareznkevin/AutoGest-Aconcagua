@@ -17,6 +17,7 @@ frontend/.env.local
 # Deployment secrets and generated assets
 **/__pycache__/
 backend/staticfiles/
+backend/media/
 .env
 .env.*
 **/.env
