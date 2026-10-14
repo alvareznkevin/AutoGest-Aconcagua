@@ -15,14 +15,32 @@ const moneda = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CL
 const numero = new Intl.NumberFormat('es-CL');
 
 function FotoVehiculo({ vehiculo }) {
-  const [fallo, setFallo] = useState(false);
-  const foto = vehiculo.imagen
-    ? new URL(vehiculo.imagen, new URL(api.defaults.baseURL, window.location.origin)).href
-    : null;
+  const [resultado, setResultado] = useState(null);
+  useEffect(() => {
+    if (!vehiculo.imagen) return;
+    const controller = new AbortController();
+    let objetoUrl;
+    api.get(`vehiculos/${vehiculo.id}/imagen/`, {
+      responseType: 'blob', signal: controller.signal,
+    }).then(({ data }) => {
+      if (controller.signal.aborted) return;
+      objetoUrl = URL.createObjectURL(data);
+      setResultado({ imagen: vehiculo.imagen, foto: objetoUrl, fallo: false });
+    }).catch(() => {
+      if (!controller.signal.aborted) setResultado({ imagen: vehiculo.imagen, fallo: true });
+    });
+    return () => {
+      controller.abort();
+      if (objetoUrl) URL.revokeObjectURL(objetoUrl);
+    };
+  }, [vehiculo.id, vehiculo.imagen]);
+  const actual = resultado?.imagen === vehiculo.imagen ? resultado : null;
+  const foto = actual?.foto;
+  const fallo = actual?.fallo;
   return <div className="vehicle-photo">
     {foto && !fallo
-      ? <img src={foto} alt={`${vehiculo.marca} ${vehiculo.modelo}, patente ${vehiculo.patente}`} loading="lazy" onError={() => setFallo(true)} />
-      : <div className="vehicle-photo-placeholder"><CarFront size={48} strokeWidth={1.3} /><span>{fallo ? 'Fotografía no disponible' : 'Sin fotografía'}</span></div>}
+      ? <img src={foto} alt={`${vehiculo.marca} ${vehiculo.modelo}, patente ${vehiculo.patente}`} loading="lazy" onError={() => setResultado({ imagen: vehiculo.imagen, fallo: true })} />
+      : <div className="vehicle-photo-placeholder"><CarFront size={48} strokeWidth={1.3} /><span>{fallo ? 'Fotografía no disponible' : vehiculo.imagen ? 'Cargando fotografía…' : 'Sin fotografía'}</span></div>}
   </div>;
 }
 
