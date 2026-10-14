@@ -11,6 +11,7 @@ export default function AppHeader() {
       <nav className="main-nav" aria-label="Navegación principal">
         <NavLink to="/dashboard"><LayoutDashboard size={17} />Inicio</NavLink>
         <NavLink to="/clientes"><Users size={17} />Clientes</NavLink>
+        <NavLink to="/vehiculos"><CarFront size={17} />Vehículos</NavLink>
       </nav>
       <div className="account"><span className="avatar" aria-hidden="true">{name.slice(0,2).toUpperCase()}</span><div className="account-name"><strong>{name}</strong><small>{user?.rol}</small></div><button className="logout" onClick={logout} aria-label="Cerrar sesión" title="Cerrar sesión"><LogOut size={18} /></button></div>
     </div>

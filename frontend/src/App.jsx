@@ -5,6 +5,8 @@ import Dashboard from './components/Dashboard';
 import RegistroCliente from './components/RegistroCliente';
 import ListaClientes from './components/ListaClientes';
 import './App.css';
+import RegistrarVehiculo from './components/RegistrarVehiculo';
+import ListaVehiculos from './components/ListaVehiculos';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -22,6 +24,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/vehiculos" element={<ProtectedRoute><ListaVehiculos /></ProtectedRoute>} />
+          <Route path="/vehiculos/registrar" element={<ProtectedRoute><RegistrarVehiculo /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

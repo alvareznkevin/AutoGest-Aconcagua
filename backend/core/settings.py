@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'usuarios',
     'clientes.apps.ClientesConfig',
+    'finanzas',
+    'vehiculos',
 ]
 
 MIDDLEWARE = [
@@ -164,4 +166,9 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+
+
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
