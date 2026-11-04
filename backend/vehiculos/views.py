@@ -32,3 +32,9 @@ class VehiculoImagenView(APIView):
         respuesta['Cache-Control'] = 'private, no-store'
         respuesta['X-Content-Type-Options'] = 'nosniff'
         return respuesta
+
+
+class VehiculoDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Vehiculo.objects.all()
+    serializer_class = VehiculoSerializer
+    permission_classes = [IsAuthenticated]

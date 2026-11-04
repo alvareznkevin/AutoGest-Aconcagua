@@ -26,6 +26,10 @@ function App() {
           <Route path="*" element={<Navigate to="/dashboard" />} />
           <Route path="/vehiculos" element={<ProtectedRoute><ListaVehiculos /></ProtectedRoute>} />
           <Route path="/vehiculos/registrar" element={<ProtectedRoute><RegistrarVehiculo /></ProtectedRoute>} />
+          <Route path="/vehiculos/:id/editar" element={<ProtectedRoute><RegistrarVehiculo />
+    </ProtectedRoute>
+  }
+/>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
