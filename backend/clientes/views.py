@@ -11,7 +11,7 @@ class RegistrarClienteView(generics.ListCreateAPIView):
     serializer_class = ClienteSerializer
     permission_classes = [IsAdminUser]
 
-class DetalleClienteView(generics.RetrieveUpdateAPIView):
+class DetalleClienteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
     permission_classes = [IsAdminUser]

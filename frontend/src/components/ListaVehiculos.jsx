@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CarFront, Plus, Search, Pencil } from 'lucide-react';
 import AppHeader from './AppHeader';
@@ -149,6 +149,31 @@ export default function ListaVehiculos() {
   const [busqueda, setBusqueda] = useState('');
   const [filtros, setFiltros] = useState({ ...filtrosIniciales });
 
+  const [eliminandoId, setEliminandoId] = useState(null);
+  const [errorEliminar, setErrorEliminar] = useState('');
+  const [avisoEliminar, setAvisoEliminar] = useState('');
+  const eliminacionPendiente = useRef(false);
+
+  async function eliminarRegistro(registro) {
+    if (eliminacionPendiente.current) return;
+    if (!window.confirm(`¿Eliminar vehículo "${registro.patente}"? Esta acción no se puede deshacer.`)) return;
+    eliminacionPendiente.current = true;
+    setEliminandoId(registro.id);
+    setErrorEliminar('');
+    setAvisoEliminar('');
+    try {
+      await api.delete(`vehiculos/${registro.id}/`);
+      setVehiculos(actuales => actuales.filter(item => item.id !== registro.id));
+      setAvisoEliminar('Registro eliminado correctamente.');
+    } catch (error) {
+      setErrorEliminar(error.response?.data?.detail || 'No fue posible eliminar el registro. Inténtalo nuevamente.');
+    } finally {
+      eliminacionPendiente.current = false;
+      setEliminandoId(null);
+    }
+  }
+
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -278,6 +303,8 @@ export default function ListaVehiculos() {
       <AppHeader />
 
       <main className="workspace">
+        {errorEliminar && <p className="delete-error" role="alert">{errorEliminar}</p>}
+        {avisoEliminar && <p className="delete-success" role="status">{avisoEliminar}</p>}
         <div className="section-kicker">INVENTARIO VEHICULAR</div>
 
         <section className="dashboard-welcome">
@@ -507,7 +534,9 @@ export default function ListaVehiculos() {
                             </p>
                           )}
 
-                          <div className="vehicle-card-actions">
+                          <div className="vehicle-card-actions"><button type="button" className="button-secondary button-danger" disabled={eliminandoId !== null} onClick={() => eliminarRegistro(vehiculo)} aria-label={`Eliminar vehículo ${vehiculo.patente}`}>
+          {eliminandoId === vehiculo.id ? 'Eliminando…' : 'Eliminar'}
+        </button>
                             <Link className="button-secondary" to={`/vehiculos/${vehiculo.id}`}>Ver detalle y tasación</Link>
                             <Link
                               className="button-secondary"

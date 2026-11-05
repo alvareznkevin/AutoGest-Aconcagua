@@ -1,3 +1,4 @@
+from django.db.models.deletion import ProtectedError
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
@@ -86,7 +87,18 @@ class VehiculoImagenView(APIView):
         return respuesta
 
 
-class VehiculoDetailView(generics.RetrieveUpdateAPIView):
+class VehiculoDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Vehiculo.objects.all()
     serializer_class = VehiculoSerializer
     permission_classes = [IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        vehiculo = self.get_object()
+        try:
+            vehiculo.delete()
+        except ProtectedError:
+            return Response(
+                {'detail': 'No se puede eliminar este vehículo porque tiene movimientos financieros asociados.'},
+                status=409,
+            )
+        return Response(status=204)
