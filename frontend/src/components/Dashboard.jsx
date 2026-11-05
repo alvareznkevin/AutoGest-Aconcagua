@@ -7,6 +7,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import AppHeader from './AppHeader';
+import IndicadoresDashboard from './IndicadoresDashboard';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -107,35 +108,7 @@ export default function Dashboard() {
           </section>
         </div>
 
-        <h2 className="workflow-title">
-          Cada contacto, una oportunidad
-        </h2>
-
-        <div className="workflow-strip">
-          <div className="workflow-item">
-            <span>01</span>
-            <div>
-              <strong>Conoce al cliente</strong>
-              <p>Guarda sus datos para mantener el contacto.</p>
-            </div>
-          </div>
-
-          <div className="workflow-item">
-            <span>02</span>
-            <div>
-              <strong>Entiende lo que busca</strong>
-              <p>Registra sus preferencias y presupuesto.</p>
-            </div>
-          </div>
-
-          <div className="workflow-item">
-            <span>03</span>
-            <div>
-              <strong>Prepara la conversación</strong>
-              <p>Consulta su información antes de atenderlo.</p>
-            </div>
-          </div>
-        </div>
+        <IndicadoresDashboard />
 
         <footer className="workspace-footer">
           <span>AutoGest Aconcagua</span>

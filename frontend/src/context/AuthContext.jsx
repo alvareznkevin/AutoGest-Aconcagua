@@ -1,19 +1,27 @@
 import { createContext, useState, useEffect, useContext } from 'react';
-import api from '../api';
+import api, { cerrarSesion } from '../api';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    try {
+      return localStorage.getItem('access_token') ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+    } catch { return null; }
+  });
+  const loading = false;
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    const savedUser = localStorage.getItem('user');
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
-    setLoading(false);
+    const actualizarSesion = () => setUser(null);
+    const sincronizar = event => {
+      if ((event.key === 'access_token' || event.key === null) && !localStorage.getItem('access_token')) setUser(null);
+    };
+    window.addEventListener('autogest:sesion-cerrada', actualizarSesion);
+    window.addEventListener('storage', sincronizar);
+    return () => {
+      window.removeEventListener('autogest:sesion-cerrada', actualizarSesion);
+      window.removeEventListener('storage', sincronizar);
+    };
   }, []);
 
   const login = async (identifier, password) => {
@@ -28,8 +36,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.clear();
-    setUser(null);
+    cerrarSesion();
   };
 
   return (
@@ -39,4 +46,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// El hook y su proveedor comparten este contexto de autenticación.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

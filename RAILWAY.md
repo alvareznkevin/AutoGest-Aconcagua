@@ -32,3 +32,12 @@ En la consola del servicio Django ejecutar `python manage.py createsuperuser` de
 
 ## Desarrollo local
 Sin variables de produccion, Django conserva SQLite y DEBUG=true. Instalar `backend/requirements.txt` en el entorno virtual. El frontend utiliza http://127.0.0.1:8000/api/ si VITE_API_URL no esta definida.
+
+## Integracion de clientes, vehiculos y consultas de patentes
+- Ambos servicios deben desplegar la rama `epica-1` del mismo repositorio.
+- Backend: configurar `GETAPI_API_KEY` para habilitar las consultas externas. Sin esta clave, el registro manual sigue disponible. No usar una variable `VITE_*` para esta clave.
+- Conservar el volumen del backend montado en `/app/media`. No reemplazarlo al desplegar: contiene las fotografias.
+- El despliegue debe ejecutar `python manage.py migrate --noinput` antes de iniciar Gunicorn. Esto aplica las nuevas migraciones de vehiculos y finanzas sin vaciar las tablas existentes.
+- Si Railway ya tiene un comando de inicio personalizado con `migrate`, puede conservarse; no quitar las migraciones hasta comprobar que el preDeployCommand de railway.json esta activo.
+- Verificar login, editar cliente, filtrar y editar vehiculos y visualizar fotografias despues del despliegue.
+- Las pruebas de consultas externas usan respuestas simuladas; comprobar una consulta real con la clave configurada.

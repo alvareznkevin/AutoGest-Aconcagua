@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import AppHeader from './AppHeader';
 import api from '../api';
 import './RegistroCliente.css';
+import NumeroVehiculo from './NumeroVehiculo';
 
 const valoresIniciales = {
   patente: '',
@@ -14,10 +15,15 @@ const valoresIniciales = {
   kilometraje: '',
   combustible: '',
   transmision: '',
-  precio_compra: '',
-  precio_venta: '',
+  precio_compra: '0',
+  precio_venta: '0',
   estado: 'disponible',
   descripcion: '',
+  vin: '',
+  numero_motor: '',
+  version: '',
+  cilindrada: '',
+  puertas: '',
 };
 
 const campos = [
@@ -79,6 +85,14 @@ const campos = [
   },
 ];
 
+campos.push(
+  { nombre: 'vin', etiqueta: 'VIN / chasis', maxLength: 50, opcional: true },
+  { nombre: 'numero_motor', etiqueta: 'Número de motor', maxLength: 100, opcional: true },
+  { nombre: 'version', etiqueta: 'Versión', maxLength: 150, opcional: true },
+  { nombre: 'cilindrada', etiqueta: 'Cilindrada / motor (según proveedor)', maxLength: 50, opcional: true },
+  { nombre: 'puertas', etiqueta: 'Puertas', tipo: 'number', opcional: true },
+);
+
 // Reinicia el formulario al cambiar de vehículo o abrir un registro nuevo.
 export default function RegistrarVehiculo() {
   const { id } = useParams();
@@ -90,6 +104,42 @@ function FormularioVehiculo({ id }) {
   const editando = Boolean(id);
   const navigate = useNavigate();
   const archivoRef = useRef(null);
+  const consultaRef = useRef(null);
+  const importadosRef = useRef({});
+  const ultimaPatenteRef = useRef('');
+  const [consultando, setConsultando] = useState(false);
+  const [avisoPatente, setAvisoPatente] = useState(null);
+
+  useEffect(() => () => consultaRef.current?.abort(), []);
+
+  async function consultarPatente() {
+    if (editando || consultando || enviando) return;
+    const patente = valores.patente.replace(/[\s-]/g, '').toUpperCase();
+    if (ultimaPatenteRef.current === patente) return;
+    if (!/^(?:[A-Z]{2}\d{4}|[A-Z]{4}\d{2})$/.test(patente)) {
+      setAvisoPatente({ tipo: 'error', texto: 'Ingresa una patente chilena válida: AB1234 o ABCD12.' });
+      return;
+    }
+    const controller = new AbortController();
+    consultaRef.current = controller;
+    setConsultando(true);
+    setAvisoPatente(null);
+    try {
+      const { data } = await api.get('vehiculos/consultar-patente/', { params: { patente }, signal: controller.signal });
+      if (controller.signal.aborted) return;
+      ultimaPatenteRef.current = patente;
+      const datos = Object.fromEntries(Object.entries(data.datos).filter(([campo]) => ['marca', 'modelo', 'anio', 'tipo', 'color', 'kilometraje', 'combustible', 'transmision', 'vin', 'numero_motor', 'version', 'cilindrada', 'puertas'].includes(campo)).map(([campo, valor]) => [campo, String(valor)]));
+      const nuevos = Object.fromEntries(Object.entries(datos).filter(([campo]) => !valores[campo]));
+      importadosRef.current = { ...importadosRef.current, ...nuevos };
+      setValores(anteriores => ({ ...anteriores, ...nuevos, patente }));
+      setErrores(anteriores => Object.fromEntries(Object.entries(anteriores).filter(([campo]) => !(campo in nuevos))));
+      setAvisoPatente({ tipo: 'success', texto: Object.keys(nuevos).length ? 'Datos disponibles completados desde GetAPI Chile. Revísalos y completa los campos restantes. El kilometraje puede corresponder a una revisión anterior.' : 'La consulta no agregó datos. Los campos que ya completaste se conservaron; revisa los datos manualmente.' });
+    } catch (error) {
+      if (!controller.signal.aborted) setAvisoPatente({ tipo: 'error', texto: error.response?.data?.detail || 'No se pudo consultar la patente. Puedes completar los datos manualmente.' });
+    } finally {
+      if (!controller.signal.aborted) setConsultando(false);
+    }
+  }
 
   const [valores, setValores] = useState({ ...valoresIniciales });
   const [imagen, setImagen] = useState(null);
@@ -158,6 +208,16 @@ function FormularioVehiculo({ id }) {
   function actualizar(event) {
     const { name, value } = event.target;
 
+    if (name === 'patente') {
+      consultaRef.current?.abort();
+      setConsultando(false);
+      setAvisoPatente(null);
+      ultimaPatenteRef.current = '';
+      const importados = importadosRef.current;
+      setValores(anteriores => Object.fromEntries(Object.entries(anteriores).map(([campo, actual]) => [campo, importados[campo] === actual ? '' : actual])));
+      importadosRef.current = {};
+    }
+
     setValores((anteriores) => ({
       ...anteriores,
       [name]: value,
@@ -174,7 +234,15 @@ function FormularioVehiculo({ id }) {
   async function guardar(event) {
     event.preventDefault();
 
-    if (enviando || cargando || errorCarga) return;
+    if (enviando || consultando || cargando || errorCarga) return;
+
+    const preciosInvalidos = Object.fromEntries(['precio_compra', 'precio_venta'].filter(campo => !/^\d+$/.test(valores[campo])).map(campo => [campo, 'Ingresa un precio entero igual o mayor que $0.']));
+    if (Object.keys(preciosInvalidos).length) {
+      setErrores(preciosInvalidos);
+      setMensaje({ tipo: 'error', texto: 'Ingresa precios enteros iguales o mayores que $0.' });
+      event.currentTarget.elements.namedItem(Object.keys(preciosInvalidos)[0])?.focus();
+      return;
+    }
 
     setEnviando(true);
     setErrores({});
@@ -204,18 +272,7 @@ function FormularioVehiculo({ id }) {
       }
 
       await api.post('vehiculos/', datos);
-
-      setValores({ ...valoresIniciales });
-      setImagen(null);
-
-      if (archivoRef.current) {
-        archivoRef.current.value = '';
-      }
-
-      setMensaje({
-        tipo: 'success',
-        texto: 'Vehículo registrado correctamente.',
-      });
+      navigate('/vehiculos', { replace: true });
     } catch (error) {
       const respuesta = error.response;
 
@@ -334,8 +391,8 @@ function FormularioVehiculo({ id }) {
                     name: campo.nombre,
                     value: valores[campo.nombre],
                     onChange: actualizar,
-                    required: true,
-                    disabled: enviando,
+                    required: !campo.opcional,
+                    disabled: enviando || (consultando && campo.nombre !== 'patente'),
                     'aria-invalid': Boolean(errores[campo.nombre]),
                     'aria-describedby': errores[campo.nombre]
                       ? `${campo.nombre}-error`
@@ -345,7 +402,7 @@ function FormularioVehiculo({ id }) {
                   return (
                     <div className="field" key={campo.nombre}>
                       <label htmlFor={campo.nombre}>
-                        {campo.etiqueta} <span>*</span>
+                        {campo.etiqueta} {!campo.opcional && <span>*</span>}
                       </label>
 
                       <div
@@ -353,7 +410,9 @@ function FormularioVehiculo({ id }) {
                           errores[campo.nombre] ? 'invalid' : ''
                         }`}
                       >
-                        {campo.opciones ? (
+                        {['precio_compra', 'precio_venta', 'kilometraje'].includes(campo.nombre) ? (
+                          <NumeroVehiculo {...atributos} moneda={campo.nombre !== 'kilometraje'} aria-describedby={`${errores[campo.nombre] ? `${campo.nombre}-error ` : ''}${campo.nombre}-hint`} />
+                        ) : campo.opciones ? (
                           <select
                             {...atributos}
                             style={{
@@ -379,9 +438,19 @@ function FormularioVehiculo({ id }) {
                             maxLength={campo.maxLength}
                             min={campo.tipo === 'number' ? 0 : undefined}
                             step={campo.tipo === 'number' ? 1 : undefined}
+                            onBlur={campo.nombre === 'patente' && !editando ? () => { if (/^(?:[A-Z]{2}\d{4}|[A-Z]{4}\d{2})$/.test(valores.patente.replace(/[\s-]/g, '').toUpperCase())) consultarPatente(); } : undefined}
                           />
                         )}
                       </div>
+
+                      {['precio_compra', 'precio_venta', 'kilometraje'].includes(campo.nombre) && <small className="field-hint" id={`${campo.nombre}-hint`}>{campo.nombre === 'kilometraje' ? 'Kilómetros enteros. Ejemplo: 125.000 km.' : 'Pesos chilenos. Ingresa un valor igual o mayor que $0.'}</small>}
+                      {campo.nombre === 'estado' && valores.estado === 'vendido' && <small className="field-hint">Al guardar como vendido se registra un ingreso por el precio de venta, que debe ser mayor que $0. No necesitas anotarlo nuevamente en Inicio.</small>}
+
+                      {campo.nombre === 'patente' && !editando && <>
+                        <button type="button" className="button-secondary" disabled={consultando || enviando || !valores.patente.trim()} onClick={consultarPatente}>{consultando ? 'Consultando patente…' : 'Consultar patente'}</button>
+                        <small className="field-hint">Se consulta al salir del campo. Puedes corregir o completar los datos manualmente.</small>
+                        {avisoPatente && <p className={avisoPatente.tipo === 'error' ? 'field-error' : 'field-hint'} role={avisoPatente.tipo === 'error' ? 'alert' : 'status'}>{avisoPatente.texto}</p>}
+                      </>}
 
                       {errores[campo.nombre] && (
                         <small
@@ -481,7 +550,7 @@ function FormularioVehiculo({ id }) {
 
               <div className="form-footer">
                 <span>* Campos obligatorios</span>
-                <button type="submit" disabled={enviando}>
+                <button type="submit" disabled={enviando || consultando}>
                   {enviando
                     ? 'Guardando…'
                     : editando

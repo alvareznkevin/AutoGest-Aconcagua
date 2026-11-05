@@ -1,0 +1,1 @@
+.client-filters label:nth-of-type(n){grid-column:span 3}.client-edit{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}.clients-table td{overflow-wrap:anywhere}@media(max-width:1000px){.client-filters label:nth-of-type(n){grid-column:span 3}}@media(max-width:600px){.client-filters label:nth-of-type(n){grid-column:1 / -1}}

@@ -508,6 +508,7 @@ export default function ListaVehiculos() {
                           )}
 
                           <div className="vehicle-card-actions">
+                            <Link className="button-secondary" to={`/vehiculos/${vehiculo.id}`}>Ver detalle y tasación</Link>
                             <Link
                               className="button-secondary"
                               to={`/vehiculos/${vehiculo.id}/editar`}
