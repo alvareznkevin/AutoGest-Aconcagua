@@ -8,6 +8,7 @@ import './App.css';
 import RegistrarVehiculo from './components/RegistrarVehiculo';
 import ListaVehiculos from './components/ListaVehiculos';
 import DetalleVehiculo from './components/DetalleVehiculo';
+import RecomendacionesCliente from './components/RecomendacionesCliente';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -20,6 +21,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/clientes/:id/recomendaciones" element={<ProtectedRoute><RecomendacionesCliente /></ProtectedRoute>} />
           <Route path="/clientes" element={<ProtectedRoute><ListaClientes /></ProtectedRoute>} />
           <Route path="/clientes/registrar" element={<ProtectedRoute><RegistroCliente /></ProtectedRoute>} />
           <Route path="/clientes/:id/editar" element={<ProtectedRoute><RegistroCliente /></ProtectedRoute>} />

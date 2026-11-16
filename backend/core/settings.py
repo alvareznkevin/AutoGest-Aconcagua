@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import os
+import json
 from pathlib import Path
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -18,6 +19,8 @@ from django.core.exceptions import ImproperlyConfigured
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 GETAPI_API_KEY = os.environ.get('GETAPI_API_KEY', '')
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '')
+GROQ_MODEL = os.environ.get('GROQ_MODEL', 'openai/gpt-oss-20b')
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,6 +30,19 @@ def env_list(name, default=""):
     return [value.strip() for value in os.environ.get(name, default).split(",") if value.strip()]
 
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
+
+# Configuración local explícita: nunca se carga en producción ni en Railway.
+# Se excluye de Git (.env.*) y del contexto Docker (.env*).
+if DEBUG and not os.environ.get('RAILWAY_ENVIRONMENT_ID'):
+    groq_local = BASE_DIR / '.env.groq.local.json'
+    if groq_local.is_file():
+        try:
+            configuracion_groq = json.loads(groq_local.read_text(encoding='utf-8-sig'))
+            GROQ_API_KEY = str(configuracion_groq['GROQ_API_KEY']).strip()
+            GROQ_MODEL = str(configuracion_groq.get('GROQ_MODEL', GROQ_MODEL)).strip()
+        except (OSError, ValueError, KeyError, TypeError):
+            raise ImproperlyConfigured('La configuración local de Groq no es válida.') from None
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 if not SECRET_KEY:
     if not DEBUG:
