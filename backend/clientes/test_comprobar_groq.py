@@ -5,7 +5,7 @@ from django.core.management import call_command, CommandError
 from clientes.recomendaciones import ErrorRecomendacion
 
 
-@override_settings(GROQ_API_KEY='clave-ficticia', GROQ_MODEL='openai/gpt-oss-20b')
+@override_settings(GROQ_API_KEY='clave-ficticia', GROQ_MODEL='openai/gpt-oss-120b')
 class ComprobarGroqTests(SimpleTestCase):
     @patch('clientes.management.commands.comprobar_groq.consultar_ia')
     def test_prueba_no_imprime_clave(self, consultar):

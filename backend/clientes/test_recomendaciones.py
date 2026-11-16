@@ -85,7 +85,7 @@ class RecomendacionesTests(APITestCase):
         self.assertNotIn('clave-prueba', request.full_url)
         self.assertEqual(request.full_url, 'https://api.groq.com/openai/v1/chat/completions')
         payload = json.loads(request.data)
-        self.assertEqual(payload['model'], 'openai/gpt-oss-20b')
+        self.assertEqual(payload['model'], 'openai/gpt-oss-120b')
         self.assertTrue(payload['response_format']['json_schema']['strict'])
         self.assertFalse(payload['response_format']['json_schema']['schema']['additionalProperties'])
         self.assertEqual(payload['max_completion_tokens'], 2048)
@@ -133,3 +133,30 @@ class RecomendacionesTests(APITestCase):
         abrir.return_value.__enter__.return_value = io.BytesIO(json.dumps({'choices': [{'finish_reason': 'length', 'message': {'content': '{}'}}]}).encode())
         with self.assertRaises(ErrorRecomendacion):
             consultar_ia({})
+
+    @patch('clientes.recomendaciones.consultar_ia')
+    def test_inventario_no_oculta_explica_externos_vacios(self, ia):
+        ia.return_value = {'inventario': [{'id': self.v.pk, 'motivo': 'Coincide'}], 'externos': [], 'explicacion_inventario': 'Disponible', 'explicacion_externos': 'Las restricciones son incompatibles; revisa el presupuesto.'}
+        response = self.client.post(self.url, self.criterios)
+        self.assertEqual(len(response.data['inventario']), 1)
+        self.assertEqual(response.data['externos'], [])
+        self.assertIn('restricciones', response.data['explicacion_externos'])
+
+    @patch('clientes.recomendaciones.consultar_ia')
+    def test_informa_sugerencias_externas_descartadas_por_duplicadas(self, ia):
+        ia.return_value = {'inventario': [], 'externos': [{'marca': self.v.marca, 'modelo': self.v.modelo, 'motivo': 'Mismo', 'verificar': ['Versión']}], 'explicacion_externos': 'Encontré una alternativa'}
+        response = self.client.post(self.url, self.criterios)
+        self.assertEqual(response.data['externos'], [])
+        self.assertIn('repetían modelos', response.data['explicacion_externos'])
+
+    @patch('clientes.recomendaciones.urlopen')
+    def test_contrato_exige_explicacion_de_ambas_secciones(self, abrir):
+        texto = json.dumps({'inventario': [], 'externos': [], 'explicacion_inventario': 'Sin candidatos', 'explicacion_externos': 'Revisar criterios'})
+        abrir.return_value.__enter__.return_value = io.BytesIO(json.dumps({'choices': [{'finish_reason': 'stop', 'message': {'content': texto}}]}).encode())
+        resultado = consultar_ia({})
+        payload = json.loads(abrir.call_args.args[0].data)
+        required = payload['response_format']['json_schema']['schema']['required']
+        self.assertIn('explicacion_externos', required)
+        self.assertIn('explicacion_inventario', required)
+        self.assertIn('dos tareas independientes', payload['messages'][0]['content'])
+        self.assertEqual(resultado['explicacion_externos'], 'Revisar criterios')

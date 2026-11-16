@@ -1,7 +1,7 @@
 # Recomendaciones para clientes
 
 En Clientes > Recomendar vehículos, revisar preferencias y filtros antes de generar.
-Backend: configurar GROQ_API_KEY y opcionalmente GROQ_MODEL (por defecto openai/gpt-oss-20b). Reiniciar/desplegar Railway. La clave GETAPI_API_KEY de patentes no sirve para Groq. Obtener una clave en Groq Console, revisar condiciones y cuota del proveedor. No subir claves a Git ni definirlas como VITE_*.
+Backend: configurar GROQ_API_KEY y opcionalmente GROQ_MODEL (por defecto openai/gpt-oss-120b). Reiniciar/desplegar Railway. La clave GETAPI_API_KEY de patentes no sirve para Groq. Obtener una clave en Groq Console, revisar condiciones y cuota del proveedor. No subir claves a Git ni definirlas como VITE_*.
 
 POST /api/clientes/{id}/recomendaciones/ requiere administrador y acepta preferencias (obligatorio, hasta 1000 caracteres), presupuesto_maximo (entero positivo opcional), tipo y transmision opcionales. No modifica clientes, inventario ni movimientos financieros. No requiere migraciones.
 
@@ -17,3 +17,5 @@ No requiere instalar SDK. REST con Authorization Bearer, esquema JSON estricto y
 
 ## Clave local persistente
 En desarrollo, si existe `backend/.env.groq.local.json`, Django lee de él GROQ_API_KEY y GROQ_MODEL, dando prioridad a esta configuración sobre las variables de la terminal. Es un archivo JSON privado excluido de Git y Docker. No se carga cuando DEBUG=false o en Railway; producción conserva las variables del servicio. No compartir ni adjuntar este archivo a entregas. Para cambiar la clave local, editarlo sin mostrar su contenido en capturas; para volver a las variables de entorno, retirar el archivo.
+
+La evaluación del inventario y de modelos externos es independiente. La respuesta incluye explicacion_inventario y explicacion_externos. Si el backend descarta sugerencias externas por duplicadas o internos por cambios de disponibilidad, lo informa. El modelo predeterminado pasa a openai/gpt-oss-120b tras observar respuestas externas vacías con 20b. Cambiar también GROQ_MODEL en Railway; no hay garantía de resultados cuando no existen alternativas razonables.
