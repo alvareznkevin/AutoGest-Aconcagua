@@ -1,3 +1,4 @@
+import './MejorasInterfaz.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -32,8 +33,10 @@ export default function Dashboard() {
           <span className="workspace-tag">AutoGest Aconcagua</span>
         </section>
 
+        <IndicadoresDashboard />
+
         <div className="section-caption">
-          <h2>Gestión del negocio</h2>
+          <h2>Accesos rápidos</h2>
           <span>Selecciona un módulo para comenzar</span>
         </div>
 
@@ -48,14 +51,11 @@ export default function Dashboard() {
             </div>
 
             <h2>
-              Relaciones que comienzan
-              <br />
-              con una conversación.
+              Clientes y seguimiento
             </h2>
 
             <p>
-              Registra los datos de contacto y las preferencias de
-              quienes buscan su próximo vehículo.
+              Consulta contactos, preferencias y recomendaciones.
             </p>
 
             <div className="module-bottom">
@@ -88,8 +88,7 @@ export default function Dashboard() {
             <h2>Inventario de vehículos</h2>
 
             <p>
-              Registra vehículos, fotografías y sus características
-              técnicas para organizar el inventario de tu automotora.
+              Consulta el stock o incorpora un nuevo vehículo.
             </p>
 
             <div className="module-bottom">
@@ -108,7 +107,6 @@ export default function Dashboard() {
           </section>
         </div>
 
-        <IndicadoresDashboard />
 
         <footer className="workspace-footer">
           <span>AutoGest Aconcagua</span>

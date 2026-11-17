@@ -1,0 +1,44 @@
+/* Acciones compartidas por las filas de clientes y tarjetas de vehículos. */
+.record-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.record-actions .record-action {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid #cfe0db;
+  border-radius: 9px;
+  background: #fff;
+  color: #23534c;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: normal;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, box-shadow .16s;
+}
+.record-action svg { flex-shrink: 0; }
+.record-actions .action-edit:hover { background: #edf6f2; border-color: #88b8aa; }
+.record-actions .action-delete { color: #ac4444; border-color: #efdada; background: #fffafa; }
+.record-actions .action-delete:hover:not(:disabled) { background: #ffeded; border-color: #dbb0b0; }
+.record-actions .action-feature { grid-column: 1 / -1; background: #eaf4f0; color: #176b5e; border-color: #d0e6dc; }
+.record-actions .action-feature:hover { background: #dbede5; border-color: #9ecbbb; }
+.record-actions .record-action:focus-visible { outline: 3px solid #72b5a5; outline-offset: 3px; }
+.record-actions .record-action:disabled { opacity: .55; cursor: wait; }
+.vehicle-card-actions.record-actions { display: grid; flex-direction: initial; }
+.vehicle-card-actions.record-actions .record-action { min-height: 42px; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { .record-actions .record-action { transition: none; } }

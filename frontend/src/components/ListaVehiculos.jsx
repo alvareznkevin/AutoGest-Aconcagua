@@ -1,9 +1,13 @@
+import RegistrarVenta from './RegistrarVenta';
+import ConfirmarEliminacion from './ConfirmarEliminacion';
+import FiltrosPlegables from './FiltrosPlegables';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CarFront, Plus, Search, Pencil } from 'lucide-react';
+import { CarFront, Plus, Search, Pencil, Trash2, Eye, Banknote, CircleCheck } from 'lucide-react';
 import AppHeader from './AppHeader';
 import api from '../api';
 import './ListaVehiculos.css';
+import './AccionesRegistro.css';
 
 const etiquetas = {
   automovil: 'Automóvil',
@@ -153,10 +157,12 @@ export default function ListaVehiculos() {
   const [errorEliminar, setErrorEliminar] = useState('');
   const [avisoEliminar, setAvisoEliminar] = useState('');
   const eliminacionPendiente = useRef(false);
+  const [registroAEliminar, setRegistroAEliminar] = useState(null);
+  const [vehiculoAVender, setVehiculoAVender] = useState(null);
+  const [avisoVenta, setAvisoVenta] = useState('');
 
   async function eliminarRegistro(registro) {
     if (eliminacionPendiente.current) return;
-    if (!window.confirm(`¿Eliminar vehículo "${registro.patente}"? Esta acción no se puede deshacer.`)) return;
     eliminacionPendiente.current = true;
     setEliminandoId(registro.id);
     setErrorEliminar('');
@@ -165,6 +171,7 @@ export default function ListaVehiculos() {
       await api.delete(`vehiculos/${registro.id}/`);
       setVehiculos(actuales => actuales.filter(item => item.id !== registro.id));
       setAvisoEliminar('Registro eliminado correctamente.');
+      setRegistroAEliminar(null);
     } catch (error) {
       setErrorEliminar(error.response?.data?.detail || 'No fue posible eliminar el registro. Inténtalo nuevamente.');
     } finally {
@@ -301,9 +308,12 @@ export default function ListaVehiculos() {
   return (
     <div className="vehicles-page">
       <AppHeader />
+    {vehiculoAVender && <RegistrarVenta vehiculo={vehiculoAVender} onCerrar={() => setVehiculoAVender(null)} onGuardada={venta => { setVehiculos(filas => filas.map(v => v.id === venta.vehiculo ? { ...v, estado: 'vendido', precio_venta: venta.precio_venta, venta_registrada: true } : v)); setVehiculoAVender(null); setAvisoVenta('Venta registrada. El ingreso y la ganancia ya están disponibles en el dashboard.'); }}/>}
+    {registroAEliminar && <ConfirmarEliminacion nombre={registroAEliminar.patente} tipo="vehículo" pendiente={eliminandoId !== null} error={errorEliminar} onCancelar={() => { if (eliminandoId === null) { setRegistroAEliminar(null); setErrorEliminar(''); } } } onConfirmar={() => eliminarRegistro(registroAEliminar)}/>}
 
       <main className="workspace">
-        {errorEliminar && <p className="delete-error" role="alert">{errorEliminar}</p>}
+        {avisoVenta && <p className="delete-success" role="status">{avisoVenta}</p>}
+        {errorEliminar && !registroAEliminar && <p className="delete-error" role="alert">{errorEliminar}</p>}
         {avisoEliminar && <p className="delete-success" role="status">{avisoEliminar}</p>}
         <div className="section-kicker">INVENTARIO VEHICULAR</div>
 
@@ -367,7 +377,7 @@ export default function ListaVehiculos() {
                 </label>
               </div>
 
-              <div className="vehicle-filters">
+              <FiltrosPlegables cantidad={Object.values(filtros).filter(v => String(v).trim()).length}><div className="vehicle-filters">
                 <label>
                   Marca
                   <select
@@ -433,7 +443,7 @@ export default function ListaVehiculos() {
                 >
                   Limpiar filtros
                 </button>
-              </div>
+              </div></FiltrosPlegables>
 
               {filtrosInvalidos ? (
                 <p role="alert" className="field-error">
@@ -534,18 +544,11 @@ export default function ListaVehiculos() {
                             </p>
                           )}
 
-                          <div className="vehicle-card-actions"><button type="button" className="button-secondary button-danger" disabled={eliminandoId !== null} onClick={() => eliminarRegistro(vehiculo)} aria-label={`Eliminar vehículo ${vehiculo.patente}`}>
-          {eliminandoId === vehiculo.id ? 'Eliminando…' : 'Eliminar'}
-        </button>
-                            <Link className="button-secondary" to={`/vehiculos/${vehiculo.id}`}>Ver detalle y tasación</Link>
-                            <Link
-                              className="button-secondary"
-                              to={`/vehiculos/${vehiculo.id}/editar`}
-                              aria-label={`Editar vehículo ${vehiculo.patente}`}
-                            >
-                              <Pencil size={16} />
-                              Editar vehículo
-                            </Link>
+                          <div className="vehicle-card-actions record-actions" aria-label={`Acciones para vehículo ${vehiculo.patente}`}>
+                            <button type="button" className="record-action action-sale" disabled={vehiculo.estado === 'vendido' || vehiculo.venta_registrada} onClick={() => setVehiculoAVender(vehiculo)}>{vehiculo.estado === 'vendido' || vehiculo.venta_registrada ? <><CircleCheck size={16}/>Vendido</> : <><Banknote size={16}/>Registrar venta</>}</button>
+                            <Link className="record-action action-edit" to={`/vehiculos/${vehiculo.id}/editar`} aria-label={`Editar vehículo ${vehiculo.patente}`}><Pencil size={16} aria-hidden="true"/>Editar</Link>
+                            <button type="button" className="record-action action-delete" disabled={eliminandoId !== null} onClick={() => { setErrorEliminar(''); setRegistroAEliminar(vehiculo); } } aria-label={`Eliminar vehículo ${vehiculo.patente}`}><Trash2 size={16} aria-hidden="true"/>{eliminandoId === vehiculo.id ? 'Eliminando…' : 'Eliminar'}</button>
+                            <Link className="record-action action-feature" to={`/vehiculos/${vehiculo.id}`}><Eye size={16} aria-hidden="true"/>Ver detalle y tasación</Link>
                           </div>
                         </div>
                       </article>

@@ -1,3 +1,4 @@
+import './MejorasInterfaz.css';
 import { useEffect, useRef, useState } from 'react'
 import { Check, CheckCircle2, CircleAlert, Mail, Phone, Search, UserRound, UserRoundPlus } from 'lucide-react'
 import './RegistroCliente.css'
@@ -115,7 +116,7 @@ function FormularioCliente({ id }) {
 
           </aside>
 
-          {cargando ? <p className="directory-message" role="status">Cargando cliente…</p> : errorCarga ? <div className="directory-message"><p role="alert">{errorCarga}</p><button className="button-secondary" onClick={() => { setErrorCarga(''); setCargando(true); setRevision(value => value + 1) }}>Reintentar</button><Link to="/clientes">Volver a clientes</Link></div> : <form className="registration-form" ref={formRef} onSubmit={submit} noValidate>
+          {cargando ? <p className="directory-message" role="status">Cargando cliente…</p> : errorCarga ? <div className="directory-message"><p role="alert">{errorCarga}</p><button className="button-secondary" onClick={() => { setErrorCarga(''); setCargando(true); setRevision(value => value + 1) }}>Reintentar</button><Link to="/clientes">Volver a clientes</Link></div> : <form className="registration-form client-registration-form" ref={formRef} onSubmit={submit} noValidate>
             <section aria-labelledby="contact-heading">
               <div className="section-heading"><span className="step-badge">01</span><div><h2 id="contact-heading">Datos de contacto</h2><p>Completa la información del cliente.</p></div></div>
               <div className="fields">

@@ -12,3 +12,32 @@
 .recommendation-badge { display: inline-block; color: var(--primary); background: #e8f3ef; border-radius: 6px; padding: 6px 9px; font-size: 11px; font-weight: 700; letter-spacing: .06em; }.external .recommendation-badge { background: #f8f1e5; color: #815b26; }.recommendation-price { display: block; font-size: 24px; margin-top: 18px; }.recommendation-empty { padding: 28px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); }
 @media(max-width: 950px) { .recommendation-grid { grid-template-columns: 1fr 1fr; } }
 @media(max-width: 650px) { .recommendation-grid,.recommendation-form fieldset { grid-template-columns: 1fr; }.recommendation-form { padding: 20px; } }
+
+/* Dos orígenes visuales: stock disponible y abastecimiento por cotizar. */
+.recommendation-section { border-radius: 20px; padding: 26px; background: #eef5f2; border: 1px solid #dce9e2; }
+.recommendation-section.external-recommendations { background: #f7f4ee; border-color: #e9e2d6; }
+.recommendation-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.recommendation-section-heading h2 { margin: 0; font-size: 21px; letter-spacing: -.4px; }
+.recommendation-section>p { font-size: 13px; margin-bottom: 22px; }
+.recommendation-total { flex-shrink: 0; border-radius: 20px; padding: 7px 11px; background: #fff; border: 1px solid #dce7e1; color: #526d63; font-size: 11px; font-weight: 600; }
+.external-recommendations .recommendation-total { color: #816847; border-color: #e8dece; }
+.recommendation-card { display: flex; flex-direction: column; padding: 23px; box-shadow: 0 4px 18px #132d3705; }
+.recommendation-card>span:not(.recommendation-badge) { color: var(--muted); font-size: 12px; }
+.recommendation-badge { align-self: flex-start; }
+.recommendation-card h3 { font-size: 22px; letter-spacing: -.4px; line-height: 1.35; }
+.recommendation-price { color: var(--primary); font-variant-numeric: tabular-nums; }
+.recommendation-match { margin: 20px 0; border-radius: 11px; padding: 14px; background: #f0f7f3; border: 1px solid #e0ece5; }
+.recommendation-match h4 { display: flex; gap: 7px; align-items: center; margin: 0 0 8px; font-size: 12px; color: #256a53; }
+.recommendation-match h4 svg { flex-shrink: 0; }
+.recommendation-match p { margin: 0; font-size: 13px; color: #405c51; }
+.external .recommendation-match { background: #faf6ef; border-color: #eee4d4; }
+.external .recommendation-match h4,.external .recommendation-match p { color: #765d39; }
+.recommendation-card>.button-secondary { margin-top: auto; font-size: 13px; }
+.recommendation-pending-price { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.recommendation-pending-price span { color: var(--muted); font-size: 11px; }
+.recommendation-pending-price strong { color: #836335; font-size: 20px; }
+.recommendation-checklist-title { display: flex; gap: 7px; align-items: center; font-size: 12px; }
+.recommendation-card ul { margin-top: 4px; margin-bottom: 20px; }
+.recommendation-card li { color: #526570; font-size: 12px; margin-bottom: 7px; }
+.recommendation-card>small { margin-top: auto; border-top: 1px solid var(--line); padding-top: 14px; }
+@media(max-width: 650px) { .recommendation-section { padding: 18px; }.recommendation-section-heading { align-items: flex-start; }.recommendation-section-heading h2 { font-size: 18px; }.recommendation-total { padding: 6px 8px; } }

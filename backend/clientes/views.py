@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models.deletion import ProtectedError
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 
@@ -15,6 +16,13 @@ class DetalleClienteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
     permission_classes = [IsAdminUser]
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            self.get_object().delete()
+        except ProtectedError:
+            return Response({'detail': 'El cliente tiene ventas registradas y no puede eliminarse.'}, status=409)
+        return Response(status=204)
 
 
 from django.shortcuts import get_object_or_404

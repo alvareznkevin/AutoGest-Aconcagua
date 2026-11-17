@@ -1,3 +1,4 @@
+import './MejorasInterfaz.css';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AppHeader from './AppHeader';
@@ -92,6 +93,23 @@ campos.push(
   { nombre: 'cilindrada', etiqueta: 'Cilindrada / motor (según proveedor)', maxLength: 50, opcional: true },
   { nombre: 'puertas', etiqueta: 'Puertas', tipo: 'number', opcional: true },
 );
+
+const gruposFormulario = [
+  { titulo: 'Identificación', ayuda: 'Patente, marca y datos generales.', campos: ['patente', 'marca', 'modelo', 'anio', 'tipo', 'color'] },
+  { titulo: 'Características', ayuda: 'Uso, combustible y transmisión.', campos: ['kilometraje', 'combustible', 'transmision'] },
+  { titulo: 'Precios y disponibilidad', ayuda: 'Valores en pesos chilenos y estado comercial.', campos: ['precio_compra', 'precio_venta', 'estado'] },
+  { titulo: 'Ficha técnica opcional', ayuda: 'Completa estos datos si están disponibles.', campos: ['vin', 'numero_motor', 'version', 'cilindrada', 'puertas'] },
+];
+
+function VistaPreviaFoto({ archivo }) {
+  const imagenRef = useRef(null);
+  useEffect(() => {
+    const url = URL.createObjectURL(archivo);
+    imagenRef.current.src = url;
+    return () => URL.revokeObjectURL(url);
+  }, [archivo]);
+  return <figure className="upload-preview"><img ref={imagenRef} alt="Vista previa de la fotografía seleccionada"/><figcaption><strong>{archivo.name}</strong><span>Vista previa · La fotografía se guardará al enviar el formulario.</span></figcaption></figure>;
+}
 
 // Reinicia el formulario al cambiar de vehículo o abrir un registro nuevo.
 export default function RegistrarVehiculo() {
@@ -375,17 +393,10 @@ function FormularioVehiculo({ id }) {
               )}
             </aside>
 
-            <form className="registration-form" onSubmit={guardar}>
-              <div className="section-heading">
-                <span className="step-badge">01</span>
-                <div>
-                  <h2>Datos del vehículo</h2>
-                  <p>Completa los campos obligatorios.</p>
-                </div>
-              </div>
-
-              <div className="fields">
-                {campos.map((campo) => {
+            <form className="registration-form vehicle-registration-form" onSubmit={guardar}>
+              <div className="form-introduction"><h2>{editando ? 'Actualiza la ficha del vehículo' : 'Completa la ficha del vehículo'}</h2><p>Avanza por las secciones y revisa los campos marcados con * antes de guardar.</p></div>
+              {gruposFormulario.map((grupo, indice) => <fieldset className="vehicle-form-group" key={grupo.titulo}><legend><span>{String(indice + 1).padStart(2, '0')}</span>{grupo.titulo}</legend><p className="form-group-hint">{grupo.ayuda}</p><div className="fields">
+                {campos.filter(campo => grupo.campos.includes(campo.nombre)).map((campo) => {
                   const atributos = {
                     id: campo.nombre,
                     name: campo.nombre,
@@ -463,11 +474,11 @@ function FormularioVehiculo({ id }) {
                     </div>
                   );
                 })}
-              </div>
+              </div></fieldset>)}
 
               <section className="preferences-section">
                 <div className="section-heading">
-                  <span className="step-badge">02</span>
+                  <span className="step-badge">05</span>
                   <div>
                     <h2>Información adicional</h2>
                     <p>Agrega una descripción y una fotografía.</p>
@@ -525,6 +536,7 @@ function FormularioVehiculo({ id }) {
                     />
                   </div>
 
+                  {imagen && <VistaPreviaFoto archivo={imagen}/>}
                   <small className="field-hint" id="imagen-ayuda">
                     {editando && tieneImagen
                       ? 'Hay una foto guardada. Se conservará si no seleccionas otra.'

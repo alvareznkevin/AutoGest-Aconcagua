@@ -43,6 +43,15 @@ if DEBUG and not os.environ.get('RAILWAY_ENVIRONMENT_ID'):
         except (OSError, ValueError, KeyError, TypeError):
             raise ImproperlyConfigured('La configuración local de Groq no es válida.') from None
 
+    getapi_local = BASE_DIR / '.env.getapi.local.json'
+    if getapi_local.is_file():
+        try:
+            configuracion_getapi = json.loads(getapi_local.read_text(encoding='utf-8-sig'))
+            GETAPI_API_KEY = str(configuracion_getapi['GETAPI_API_KEY']).strip()
+        except (OSError, ValueError, KeyError, TypeError):
+            raise ImproperlyConfigured('La configuración local de GetAPI no es válida.') from None
+
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 if not SECRET_KEY:
     if not DEBUG:

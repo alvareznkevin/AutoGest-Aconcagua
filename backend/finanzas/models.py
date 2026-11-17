@@ -21,3 +21,23 @@ class Movimiento(models.Model):
 
     def __str__(self):
         return f'{self.fecha} · {self.tipo} · {self.descripcion}'
+
+
+class Venta(models.Model):
+    vehiculo = models.OneToOneField('vehiculos.Vehiculo', on_delete=models.PROTECT, related_name='venta')
+    cliente = models.ForeignKey('clientes.Cliente', on_delete=models.PROTECT, related_name='ventas')
+    movimiento = models.OneToOneField(Movimiento, on_delete=models.PROTECT, related_name='venta_registrada')
+    fecha = models.DateField()
+    precio_venta = models.DecimalField(max_digits=12, decimal_places=0, validators=[MinValueValidator(1)])
+    precio_compra = models.DecimalField(max_digits=12, decimal_places=0, validators=[MinValueValidator(0)])
+    creado = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha', '-id']
+        constraints = [
+            models.CheckConstraint(condition=models.Q(precio_venta__gt=0), name='venta_precio_positivo'),
+            models.CheckConstraint(condition=models.Q(precio_compra__gte=0), name='venta_compra_no_negativa'),
+        ]
+
+    def __str__(self):
+        return f'{self.vehiculo.patente} · {self.fecha}'

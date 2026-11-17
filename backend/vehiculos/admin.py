@@ -10,3 +10,5 @@ class VehiculoAdmin(admin.ModelAdmin):
     )
     search_fields = ('patente', 'marca', 'modelo')
     list_filter = ('estado', 'marca', 'tipo')
+    def get_readonly_fields(self, request, obj=None):
+        return ['estado', 'precio_compra', 'precio_venta'] if obj and hasattr(obj, 'venta') else []

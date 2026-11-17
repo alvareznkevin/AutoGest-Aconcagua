@@ -13,6 +13,11 @@ class Vehiculo(models.Model):
         from finanzas.services import sincronizar_venta
         with transaction.atomic():
             anterior = type(self).objects.select_for_update().filter(pk=self.pk).first() if self.pk else None
+            from finanzas.models import Venta
+            if anterior and Venta.objects.filter(vehiculo_id=self.pk).exists():
+                protegidos = ['estado', 'precio_compra', 'precio_venta']
+                if any(getattr(self, campo) != getattr(anterior, campo) for campo in protegidos):
+                    raise ValidationError('No se pueden alterar los valores comerciales de un vehículo con venta registrada.')
             super().save(*args, **kwargs)
             sincronizar_venta(self, anterior.estado if anterior else None)
 

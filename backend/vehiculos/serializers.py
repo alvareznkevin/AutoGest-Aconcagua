@@ -4,7 +4,16 @@ from django.urls import reverse
 
 
 class VehiculoSerializer(serializers.ModelSerializer):
+    venta_registrada = serializers.SerializerMethodField()
+
+    def get_venta_registrada(self, obj):
+        return hasattr(obj, 'venta')
+
     def validate(self, attrs):
+        if self.instance and hasattr(self.instance, 'venta'):
+            for campo in ['estado', 'precio_compra', 'precio_venta']:
+                if campo in attrs and attrs[campo] != getattr(self.instance, campo):
+                    raise serializers.ValidationError({campo: 'El vehículo tiene una venta registrada; sus valores comerciales no pueden modificarse desde Editar.'})
         estado = attrs.get('estado', self.instance.estado if self.instance else 'disponible')
         precio = attrs.get('precio_venta', self.instance.precio_venta if self.instance else None)
         if estado == 'vendido' and precio is not None and precio <= 0:
@@ -41,7 +50,7 @@ class VehiculoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vehiculo
-        fields = ['id','patente', 'marca', 'modelo', 'anio', 'tipo', 'color',
+        fields = ['venta_registrada', 'id','patente', 'marca', 'modelo', 'anio', 'tipo', 'color',
                   'kilometraje', 'combustible','transmision', 'precio_compra',
                   'precio_venta','estado', 'descripcion','imagen', 'vin', 'numero_motor',
                   'version', 'cilindrada', 'puertas', 'tasacion', 'recalls', 'ficha_consultada']
